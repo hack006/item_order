@@ -6,6 +6,61 @@ classdef item_order
         outputs%obligatory
         creator%obligatory
         Results%obligatory
+        
+        % All possible characters
+        character_set
+        
+        % Vector of serie data setups
+        %  serie struct fields
+        %   * shown_to_memorize
+        %   * shown_to_match
+        %   * type
+        %       * 0 - same
+        %       * 1 - position swap
+        %       * 2 - character change
+        %   * change_position
+        TrialDataSetups
+        
+        % time for which character sequence is visible to user
+        memorize_time
+        
+        %  time for which blank screen is visible between memorizing and
+        % reasoning if string is same or different
+        delay_time
+        
+        %
+        character_swap_percentage
+        
+        %
+        character_change_percentage
+        
+        %
+        % % TODEL character_swap_count
+        
+        %
+        % % TODEL character_change_count
+        
+        %
+        % % TODEL character_not_touched_count
+        
+        % Vector of percentage of change changes on string position
+        character_position_change_percentage
+        
+        % Ordered array of position of character swap changes
+        %   * order is randomly generated on startup
+        % %% TO DELETE character_swap_arr
+        
+        % Ordered array of position of character change 
+        %   * order is randomly generated on startup
+        % % TO DELETE character_change_arr
+        
+        % Vector length 6 with changes count on respective positions
+        % % TODEL character_position_swap_count_arr
+        
+        % Vector length 6 with changes count on respective positions
+        % % TODELcharacter_position_change_count_arr
+        
+        
     end
     
     methods
@@ -13,17 +68,25 @@ classdef item_order
         function T=item_order()%obligatory
             %object constructor
             T.name = 'Item order - pořadí objektů';
-            T.inputs = {'aa','bb'};
+            T.inputs = {'string_to_memorize', 'string_to_match','change_type','change_position'};
             T.outputs = {};
             T.create_date='2014-11-05';%obligatory
             T.creator='Ondrej Janata <janaton1@fel.cvut.cz>';
-            load('Tasks/item_order/conconats.txt');
             
+            T.character_set = 'BCDFGHJKLMNPQRSTVWXYZ';
+            T.character_swap_percentage = 30; % TODO make configurable
+            T.character_change_percentage = 30; % TODO make configurable
+            T.character_position_change_percentage = [0.1, 0.15, 0.5, 0.25, 0.20, 0.15];
+            
+            % currently hard set up
+            % TODO in the future maybe make configurable
+            T.memorize_time = 5.0;
+            T.delay_time = 2.0;
         end
         
         function T=run(T,inputs)%obligatory
             %main function which describes 1 run(trial) of the task ...
-            based on the input parameters
+           
         end
         
         function T=results(T,time,gcf,j)%obligatory
@@ -34,19 +97,190 @@ classdef item_order
         end
         
         function datTask=Random(T,nmbRep)%obligatory
+            % %%%%
+            % 0)
+            % General setup
+            % %%%%
+            
+            % general setup - set trials type counts
+            T.general_experiment_setup(nmbRep);
+            GES = ans
+            
+            % %%%%
+            % 1.1)
+            % Generate array of types of trials
+            % %%%%
+            
+            CHARACTER_POSITION_CHANGE_ARR = linspace(-1,-1,GES.character_change_count)
+            CHARACTER_POSITION_SWAP_ARR = linspace(-1,-1,GES.character_swap_count)
+            
+            % generate trial type order
+            trials_type_order_source = [linspace(0,0,GES.character_not_touched_count) ...
+                linspace(1,1,GES.character_swap_count) ...
+                linspace(2,2,GES.character_change_count)];
+            trials_type_order = trials_type_order_source;
+            
+            % randomize order
+            pos = 1;
+            random_order = randperm(nmbRep)
+            for i=random_order
+                trials_type_order(pos) = trials_type_order_source(i);
+                pos = pos + 1;
+            end
+            
+            % %%%%
+            % 1.2) Generate change array
+            % With respect to procents of character position changes generate 
+            % character swap counts for positions from 1 to 6
+            %
+            % positon 1 means that first and second chars are swapped
+            % %%%%
+            percentage_for_one_trial = 1.0 / GES.character_swap_count;
+            division_remainder = 0.0;
+            char_position_change_count = 0;
+            
+            %{'string_to_memorize', 'string_to_match','change_type','change_position'};
+            for i=1:5
+                % append position to CHARACTER_POSITION_CHANGE_ARR
+                tmp = find(CHARACTER_POSITION_CHANGE_ARR < 0)
+                
+                if isempty(tmp)
+                    break
+                end
+                
+                char_position_change_count = (T.character_position_change_percentage(i) / percentage_for_one_trial);
+                char_position_change_count = char_position_change_count + division_remainder; % add remainder from previous
+                
+                
+                CHARACTER_POSITION_CHANGE_ARR(tmp(1):floor(tmp(1)+char_position_change_count-1)) = linspace(i,i,floor(char_position_change_count))
+                
+                % update remainder
+                division_remainder = mod(char_position_change_count, 1);
+                
+            end
+            % last trial count is calculated to match change count trials
+            
+            for i=(sum(CHARACTER_POSITION_CHANGE_ARR~=-1)+1):GES.character_change_count
+                CHARACTER_POSITION_CHANGE_ARR(i) = 6
+            end
+            
+            
+            % %%%%
+            % 1.3) Generate swap array
+            % With respect to procents of character position changes generate 
+            % character swap counts for positions from 1 to 6
+            %
+            % positon 1 means that first and second chars are swapped
+            % %%%%
+            
+            percentage_for_one_trial = 1.0 / GES.character_swap_count;
+            division_remainder = 0.0;
+            char_position_swap_count = 0;
+            
+            for i=1:5
+                % append position to CHARACTER_POSITION_CHANGE_ARR
+                tmp = find(CHARACTER_POSITION_SWAP_ARR < 0)
+                
+                if isempty(tmp)
+                    break
+                end                
+                
+                char_position_swap_count = (T.character_position_change_percentage(i) / percentage_for_one_trial);
+                char_position_swap_count = char_position_swap_count + division_remainder; % add remainder from previous
+                
+                CHARACTER_POSITION_SWAP_ARR(tmp(1):floor(tmp(1)+char_position_swap_count-1)) = linspace(i,i,floor(char_position_swap_count))
+                
+                % update remainder
+                division_remainder = mod(char_position_swap_count, 1);
+            end
+            % last trial count is calculated to match swap count trials
+            for i=(sum(CHARACTER_POSITION_SWAP_ARR~=-1)+1):GES.character_swap_count
+                CHARACTER_POSITION_SWAP_ARR(i) = 6
+            end
+            
+            % %%%%
+            % 2.1) Format output
+            %
             % generates table with nmbRep rows and nmbInputPar ...
             % columns with automatically generated parameters of ...
             % trials (nmbRep is number of trials)
+            % %%%%
+            change_counter = 1;
+            swap_counter = 1;
             for i=1:nmbRep
-                %datTask(i,1)=
+                pchp = randperm(size(T.character_set,2));
+                % characters which are shown
+                shown_string = sprintf('%c%c%c%c%c%c%c', T.character_set(pchp(1)), ...
+                    T.character_set(pchp(2)),T.character_set(pchp(3)), ...
+                    T.character_set(pchp(4)), T.character_set(pchp(5)), ...
+                    T.character_set(pchp(6)), T.character_set(pchp(7)));
+                % %%%%%%%
+                % DECIDE TYPE OF TRIAL
+                %   0 - no change
+                %   1 - char swap
+                %   2 - char change
+                % %%%%%%%
+                switch trials_type_order(i)                        
+                    case 1
+                        % SWAP CHARS on the (i)-th and (i+1)-th postions
+                        swapped_string = shown_string;
+                        change_position = CHARACTER_POSITION_SWAP_ARR(swap_counter);
+                        swapped_string(change_position) = shown_string(change_position + 1) 
+                        swapped_string(change_position + 1) = shown_string(change_position) 
+                        
+                        datTask(i,1:4) = {shown_string, swapped_string, 1, change_position};
+                        swap_counter = swap_counter + 1;
+                    case 2
+                        % CHANGE CHAR on the i-th position
+                        swapped_string = shown_string;
+                        change_position = CHARACTER_POSITION_SWAP_ARR(change_counter);
+                        not_used_chars = setdiff(T.character_set, shown_string);
+                        replacement_char = not_used_chars(randi(size(not_used_chars,2),1,1))
+                        swapped_string(change_position) = replacement_char;
+                        
+                        datTask(i,1:4) = {shown_string, swapped_string, 2, change_position};
+                        change_counter = change_counter + 1;
+                    otherwise
+                        datTask(i,1:4) = {shown_string, shown_string, 0, 0};
+                end
+                
             end
         end
         
         function datTask=Manual(T,nmbRep)%obligatory
+            % TODO
         end
         
         function datTask=SemiRandom(T,nmbRep)%obligatory
+            % TODO
         end
+        
+        % %%%%%%%%%%%
+        % Support functions
+        % >>>>>>>>>>
+        
+        % Check if changed char count and swap count is not larger than
+        % trials count
+        function check_input_count_correctness(count,swap_count,change_count)
+            if count < (swap_count + change_count)
+                % TODO let know that wrong value entered
+            end
+        end
+        
+        % %%%%
+        % Calculate necessary global values for experiment setup
+        %   T - reference to instance of this class
+        %   nmbRep - number of trials in experiment
+        % %%%%
+        function GES=general_experiment_setup(T,nmbRep)
+            GES.character_swap_count = round((T.character_swap_percentage / 100) * nmbRep);
+            GES.character_change_count = round((T.character_change_percentage / 100) * nmbRep);
+            GES.character_not_touched_count = nmbRep - GES.character_swap_count - GES.character_change_count;
+        end
+        
+        % <<<<<<<<<<<
+        % END support functions
+        % %%%%%%%%%%%
         
         function tasks_m=menu(T,tasks_m)%obligatory
             %can be empty
