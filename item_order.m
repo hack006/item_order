@@ -46,6 +46,10 @@ classdef item_order
         % Vector of percentage of change changes on string position
         character_position_change_percentage
         
+        % Store current trial type for transmitting type between run and
+        % result function
+        current_trial_type
+        
         % Ordered array of position of character swap changes
         %   * order is randomly generated on startup
         % %% TO DELETE character_swap_arr
@@ -78,22 +82,99 @@ classdef item_order
             T.character_change_percentage = 30; % TODO make configurable
             T.character_position_change_percentage = [0.1, 0.15, 0.5, 0.25, 0.20, 0.15];
             
+            T.current_trial_type = 0;
             % currently hard set up
             % TODO in the future maybe make configurable
             T.memorize_time = 5.0;
             T.delay_time = 2.0;
         end
         
-        function T=run(T,inputs)%obligatory
-            %main function which describes 1 run(trial) of the task ...
-           
+        function T=run(T,varargin)%obligatory
+            % %%%%
+            % WORKAROUND - direct passing arguments failed
+            % %%%%
+            string_to_memorize = varargin{1,1}
+            string_to_match = varargin{1,2}
+            tmp = varargin{1,3}
+            change_type = tmp{1}
+            tmp = varargin{1,4}
+            change_position = tmp{1}
+            % store current trial type - used in result function
+            T.current_trial_type = change_type;
+            
+            % %%%
+            % SHOW BEFORE TRIAL EXPERIMENT TEXT
+            % %%%
+            instructions_text_bg = ...
+                uicontrol('style','text','units','normalized','FontSize',16,...
+                'position',[0.05 0.85 0.9 0.1],'string','');
+            instructions_text = ...
+                uicontrol('style','text','units','normalized','FontSize',16,...
+                'position',[0.05 0.80 0.9 0.1],'string','Press any key to start next trial.');
+            test_string_bg = ...
+                uicontrol('style','text','units','normalized','FontSize',44,...
+                'position',[0.15 0.4 0.7 0.2],'BackgroundColor','black',...
+                'ForegroundColor','white','string','');
+            test_string_label = ...
+                uicontrol('style','text','units','normalized','FontSize',44,...
+                'position',[0.15 0.45 0.7 0.1],'BackgroundColor','black',...
+                'FontName', 'Monospaced', 'ForegroundColor','white','string','-------');
+            
+            waitforbuttonpress;
+            % %%%%
+            % Wait some time to memorize
+            % %%%%
+            set(instructions_text, 'string', 'Remember string')
+            set(test_string_label, 'string', string_to_memorize);
+            pause(T.memorize_time);
+            
+            % %%%%
+            % Hide all text for some time
+            % %%%%
+            %set(instructions_text, 'string', '')
+            set(test_string_label, 'string', '???????');
+            pause(T.delay_time);
+            
+            % %%%%
+            % SHOW TEXT FOR COMPARISON
+            % %%%%
+            tic; % start time measurement
+            set(instructions_text, 'string', 'Same strings - "L"         Different strings - "A"')
+            set(test_string_label, 'string', string_to_match);
         end
         
-        function T=results(T,time,gcf,j)%obligatory
-            T.Results(j).time=time
-            T.Results(j).correctness%numerical value from 0−1 which describes the quality of the answer
+        
+        function T=result(T,time,gcf,j)%obligatory
+            response_key = get(gcf,'CurrentCharacter');%last key pressed
+            
+            % %%%%
+            % TODO - 
+            % %%%%
+            if response_key == 'l' || response_key == 'L'
+                % test type of trial - only {0} marks no change
+                if T.current_trial_type == 0
+                    answer = 1;
+                else
+                    answer = 0;
+                end
+
+            elseif response_key == 'a' || response_key == 'A'
+                % test type of trial - only {1,2} marks change
+                if T.current_trial_type == 1 || T.current_trial_type == 2
+                    answer = 1;
+                else
+                    answer = 0;
+                end
+            else
+                % if bad key press mark as wrong answer
+                answer = 0;
+            end
+            
+            
+            T.Results.time(j) = time
+            T.Results.correctness(j) = answer %numerical value from 0−1 which describes the quality of the answer
             %in results you can save any further information important to be saved for the task
-            T.Results(j).any_further_information 
+            T.Results.answer_key(j) = response_key
         end
         
         function datTask=Random(T,nmbRep)%obligatory
