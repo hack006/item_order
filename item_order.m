@@ -1,5 +1,7 @@
 classdef item_order
     properties
+        %% Properties
+        
         name%obligatory
         create_date%obligatory
         inputs%obligatory
@@ -34,15 +36,6 @@ classdef item_order
         %
         character_change_percentage
         
-        %
-        % % TODEL character_swap_count
-        
-        %
-        % % TODEL character_change_count
-        
-        %
-        % % TODEL character_not_touched_count
-        
         % Vector of percentage of change changes on string position
         character_position_change_percentage
         
@@ -50,31 +43,18 @@ classdef item_order
         % result function
         current_trial_type
         
-        % Ordered array of position of character swap changes
-        %   * order is randomly generated on startup
-        % %% TO DELETE character_swap_arr
-        
-        % Ordered array of position of character change 
-        %   * order is randomly generated on startup
-        % % TO DELETE character_change_arr
-        
-        % Vector length 6 with changes count on respective positions
-        % % TODEL character_position_swap_count_arr
-        
-        % Vector length 6 with changes count on respective positions
-        % % TODELcharacter_position_change_count_arr
-        
-        
     end
     
     methods
-
-        function T=item_order()%obligatory
-            %object constructor
+        %% %%%%%
+        % @OBLIGATORY
+        % Class constructor
+        % %%%%%%
+        function T=item_order()
             T.name = 'Item order - pořadí objektů';
             T.inputs = {'string_to_memorize', 'string_to_match','change_type','change_position'};
             T.outputs = {};
-            T.create_date='2014-11-05';%obligatory
+            T.create_date='2014-11-05';
             T.creator='Ondrej Janata <janaton1@fel.cvut.cz>';
             
             T.character_set = 'BCDFGHJKLMNPQRSTVWXYZ';
@@ -89,6 +69,8 @@ classdef item_order
             T.delay_time = 2.0;
         end
         
+        %% %%%%%
+        % @OBLIGATORY
         function T=run(T,varargin)%obligatory
             % %%%%
             % WORKAROUND - direct passing arguments failed
@@ -102,9 +84,9 @@ classdef item_order
             % store current trial type - used in result function
             T.current_trial_type = change_type;
             
-            % %%%
+            % %%%%
             % SHOW BEFORE TRIAL EXPERIMENT TEXT
-            % %%%
+            % %%%%
             instructions_text_bg = ...
                 uicontrol('style','text','units','normalized','FontSize',16,...
                 'position',[0.05 0.85 0.9 0.1],'string','');
@@ -143,7 +125,8 @@ classdef item_order
             set(test_string_label, 'string', string_to_match);
         end
         
-        
+        %% %%%%%
+        % @OBLIGATORY
         function T=result(T,time,gcf,j)%obligatory
             response_key = get(gcf,'CurrentCharacter');%last key pressed
             
@@ -178,8 +161,22 @@ classdef item_order
             T.Results.answer_key(j) = response_key
         end
         
+        % %%%%%%
+        % @OBLIGATORY
+        % Random generation of task trials data 
+        %
+        % Routine which is called by Psycheeg to retreive random generated
+        % trials data for experiment.
+        %
+        % @param T [item_order] - instance of class
+        % @param nmbRep [int] - number of trials entered in dialog
+        % @return [cellarray] - formated array of computed setups of trials
+        %   - datTask(i,j)
+        %       - i = row index
+        %       - j = column index
+        % %%%%%%
         function datTask=Random(T,nmbRep)%obligatory
-            % %%%%
+            %% %%%
             % 0)
             % General setup
             % %%%%
@@ -188,7 +185,7 @@ classdef item_order
             T.general_experiment_setup(nmbRep);
             GES = ans
             
-            % %%%%
+            %% %%%
             % 1.1)
             % Generate array of types of trials
             % %%%%
@@ -210,8 +207,10 @@ classdef item_order
                 pos = pos + 1;
             end
             
-            % %%%%
-            % 1.2) Generate change array
+            %% %%%
+            % 1.2) 
+            % Generate change array
+            %
             % With respect to procents of character position changes generate 
             % character swap counts for positions from 1 to 6
             %
@@ -247,8 +246,10 @@ classdef item_order
             end
             
             
-            % %%%%
-            % 1.3) Generate swap array
+            %% %%%%
+            % 1.3) 
+            % Generate swap array
+            % 
             % With respect to procents of character position changes generate 
             % character swap counts for positions from 1 to 6
             %
@@ -280,8 +281,9 @@ classdef item_order
                 CHARACTER_POSITION_SWAP_ARR(i) = 6;
             end
             
-            % %%%%
-            % 2.1) Format output
+            %% %%%
+            % 2) 
+            % Format output
             %
             % generates table with nmbRep rows and nmbInputPar ...
             % columns with automatically generated parameters of ...
@@ -328,15 +330,33 @@ classdef item_order
                 
             end
         end
-        
-         function datTask = Manual(T,nmbRep)         %obligatory
-            datTask=T.Manually_edit(nmbRep);
-         end
+        %% %%%%%
+        % @OBLIGATORY
+        % Probably old name of routine to generate trial data manually
+        % %%%%%%
+        function datTask = Manual(T,nmbRep)        
+            datTask=T.Manually_edit(nmbRep); 
+        end
             
+        %% %%%%%
+        % @OBLIGATORY
+        % Manual generation of task trials data 
+        %
+        % Routine which is called by Psycheeg to retreive manually generated
+        % trials data for experiment.
+        % New dialog for data entering si shown.
+        %
+        % @param T [item_order] - instance of class
+        % @param nmbRep [int] - number of trials entered in dialog
+        % @return [cellarray] - formated array of computed setups of trials
+        %   - datTask(i,j)
+        %       - i = row index
+        %       - j = column index
+        % %%%%%%
          function datTask = Manually_edit(T,nmbRep)  %obligatory
-            % %%%%
+            %% %%%%%
             % Create dialog
-            % %%%%
+            % %%%%%%
             manualDialog = figure('Name','Manual task setup generator','Units','pixels','Position',[10 10 1000 700],'MenuBar', 'none','Color','white');
             
             uicontrol(manualDialog,'Units','normalized',...
@@ -352,9 +372,9 @@ classdef item_order
                 'String','Manual task setup generator. Configure values and press SAVE.',...
                 'FontSize',18);
             
-            % %%%%
+            %% %%%%%
             %  Basic setup of dialog
-            % %%%%
+            % %%%%%%
             data_types=cell(3, 2);
             
             data_types{1} = {'same',0};
@@ -407,6 +427,18 @@ classdef item_order
             delete(manualDialog);
          end
         
+         %% %%%%
+         % Callback for change in table in manual setup dialog
+         %
+         % Used for generation of decision string and for validation
+         % of entered data
+         %
+         % @param T [item_order] - instance of experiment
+         % @param hObject [handle] - handle to table
+         % @param eventData [struct] - data of changed cell
+         %      - coordinates
+         %      - old_text, nex_text, ..
+         % %%%%
          function manualTableChangedValidationCallback(T,hObject,eventData)
            
             currentTableData = get(hObject, 'Data');
@@ -414,9 +446,9 @@ classdef item_order
             selectedRow = currentTableData(selectedRowNum,:);
             
             
-            % %%%%
+            %% %%%%
             % LOAD PARAMS
-            % %%%%
+            % %%%%%
             memorize_string = selectedRow{1}
             decision_string = selectedRow{2}
             trial_type_txt = selectedRow{3}
@@ -431,9 +463,9 @@ classdef item_order
             position_change = selectedRow{4}
             new_char = selectedRow{5}
             
-            % %%%%
+            %% %%%%
             % TEST if input valid
-            % %%%%
+            % %%%%%
             trial_setup_correct = false;
             err_msg = '';
             if trial_type == 0
@@ -465,10 +497,10 @@ classdef item_order
 
             % @todo
             
-            % %%%%%
+            %% %%%%%
             % FORMAT OUTPUT
-            % %%%%%
-
+            %
+            % %%%%%%
             % cut if text longer then 7 chars 
             if size(memorize_string,2) > 7
                 memorize_string = memorize_string(1:7);
@@ -518,52 +550,85 @@ classdef item_order
             currentTableData(selectedRowNum,7) = {err_msg};
             set(hObject,'Data',currentTableData);
                
-            hObject
-            eventData
          end
         
+        %%
+        % Manual trial data setup dialog - save button callback
+        %
+        % Makes nothing special.
+        %
+        % @todo Add validation based on correctness of entered data in the
+        % table
+        %
         function manualDataSAVECallback(T,hObject,eventData)
             delete(hObject);
         end
         
-        
-        function datTask=SemiRandom(T,nmbRep)%obligatory
+        %% %%%%%
+        % @OBLIGATORY
+        % Old Routine for semirandom data trial generatin
+        % 
+        % Calling new routine Partly_random()
+        %
+        % %%%%%%
+        function datTask=SemiRandom(T,nmbRep)
             datTask=T.Partly_random(nmbRep);
         end
         
-        function datTask = Partly_random(T,nmbRep)  %obligatory
+        %% %%%%%
+        % @OBLIGATORY
+        % Old Routine for semirandom data trial generatin
+        % 
+        % @todo implement
+        % %%%%%%
+        function datTask = Partly_random(T,nmbRep)  
             % TODO
         end
         
-        % %%%%%%%%%%%
-        % Support functions
-        % >>>>>>>>>>
-        
-        % Check if changed char count and swap count is not larger than
-        % trials count
-        function check_input_count_correctness(count,swap_count,change_count)
-            if count < (swap_count + change_count)
-                % TODO let know that wrong value entered
+        %% %%%%%
+        % SUPPORT FUNCTIONS
+        %
+        % Functions which are used across methods of this class
+        % %%%%%%
+            %% %%%%%
+            % Check if changed char count and swap count is not larger than
+            % trials count
+            % %%%%%
+            function check_input_count_correctness(count,swap_count,change_count)
+                if count < (swap_count + change_count)
+                    % TODO let know that wrong value entered
+                end
             end
-        end
+
+            % %%%%
+            % Calculate necessary global values for experiment setup
+            %   
+            % @param T [item_order] - reference to instance of this class
+            % @param nmbRep [int] - number of trials in experiment
+            % @return [struct]
+            %   * character_swap_count [int] - count of trials where
+            %       swapping characters in string
+            %   * character_change_count [int] - count of trials where
+            %       changing character in string
+            %   * character_not_touched_count [int] - count of trials
+            %       without change
+            % %%%%
+            function GES=general_experiment_setup(T,nmbRep)
+                GES.character_swap_count = round((T.character_swap_percentage / 100) * nmbRep);
+                GES.character_change_count = round((T.character_change_percentage / 100) * nmbRep);
+                GES.character_not_touched_count = nmbRep - GES.character_swap_count - GES.character_change_count;
+            end
         
-        % %%%%
-        % Calculate necessary global values for experiment setup
-        %   T - reference to instance of this class
-        %   nmbRep - number of trials in experiment
-        % %%%%
-        function GES=general_experiment_setup(T,nmbRep)
-            GES.character_swap_count = round((T.character_swap_percentage / 100) * nmbRep);
-            GES.character_change_count = round((T.character_change_percentage / 100) * nmbRep);
-            GES.character_not_touched_count = nmbRep - GES.character_swap_count - GES.character_change_count;
-        end
-        
-        % <<<<<<<<<<<
-        % END support functions
-        % %%%%%%%%%%%
-        
+        %% %%%%%
+        % @OBLIGATORY
+        % Experiment menu create callback
+        %
+        % Creates only simple entry in menu - for later usage :)
+        %
+        % @param T [item_order] - class instance
+        % @param tasks_m [handle] - handle to main tasks menu
+        % %%%%%%
         function tasks_m=menu(T,tasks_m)%obligatory
-           % define simple menu holder
             m=uimenu(tasks_m,'Label','Item order');
         end
     end
