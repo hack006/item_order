@@ -28,8 +28,17 @@ Experiment si klade za cíl zjistit zpracovávání a uchovávání **pořadí**
       ![Dialog pro manuální zadávání dat experimentu](/docs/img/manual_trials_generator.png)
   
   2. Možné typy pokusů.
-    Dvojice řetězců vždy reprezentuje řetězec k zapamatování (_defaultně 5s_)
-    1. 
+    Dvojice řetězců vždy reprezentuje řetězec k zapamatování (_defaultně 5s_) a řetězec k porovnání (_zobrazen po prodlevě 2s_), u kterého participant experimentu rozhoduje, zda je shodný s tím k zapamatování.
+    1. **Řetězce jsou shodné** - např. str1="BCDFGHJ", str2="BCDFGHJ"
+    2. **Záměna znaku** - např. str1="BCDFGHJ", str2="BCYFGHJ" (_záměna 3. znaku za Y_)
+    3. **Změna pořadí** - např. str1="BCDFGHJ", str2="BDCFGHJ" (_prohození znaků na 2. a 3. pozici_)
+2. Následně je spuštěn experiment, kde jsou participantům postupně zobrazovány všechny pokusy a on rozhoduje (pomocí 2 kláves), zda se řetězce shodují. Vše probíhá v těchto fázích.
+  1. Čekání na zahájení pokusu stiskem klávesy
+  2. Zobrazení řetězce k zapamatování po dobu 5s (_výchozí hodnota_)
+  3. Skrytí textu po dobu 2s (_výchozí hodnota_)
+  4. Zobrazení řetězce k rozhodnutí, zda se shoduje s předchozím, či nikoliv.
+3. Jsou uloženy výsledky experimentu a je zobrazena úspěšnost včetně průměrného času pokusu. _Toto je již výhradně v režii PSYCHEEg toolboxu_.
+4. Zbývá vyhodnotit naměřená data ... :)
 
   
 #### Reference
@@ -39,9 +48,10 @@ Experiment byl implementován na základě informací z již zpracovaného exper
 ### Technické řešení
 
 ### TODO
+Následující souhrn věcí je možné doimplementovat nebo vylepšit v rámci budoucího rozšiřování experimentu.
 
-* implementace poloautomatického generování dat
-* dialog pro konfiguraci vnitřních parametrů
+* Implementace poloautomatického generování dat
+* Dialog pro konfiguraci vnitřních parametrů
 	* čas pamatování
 	* čas schování stimulu
 	* procentuelní zastoupení typů jednotlivých pokusů (pozice, záměna, shodné)
