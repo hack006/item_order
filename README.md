@@ -22,6 +22,8 @@ K samotnému pochopení experimentu doporučuji projít následující ilustrace
       * _character_swap_percentage_ - procentuální zastoupení pokusu experimentu, kde dochází k prohození pořadí 2 sousedích znaků
       * _character_change_percentage_ - procentuální zastoupení pokusu experimentu, kde dochází k záměně znaku
       * _character_position_change_percentage_ - definuje procentuální rozložení změn znaků na jednotlivých pozicích řetězce
+      
+      V tomto režimu se používají pouze velká písmena z množiny souhlásek anglické abecedy. Písmena se neopakují. Záměnné písmeno je použito zcela odlišné od stávajících, které jsou použity v půdovním řetězci.
     
       ![Dialog pro automatické zadávání dat experimentu](/docs/img/random_generator_results.png)
     * **Manuální generování** - je zobrazen přehledný dialog s tabulkou, do které se zadají veškeré potřebné údaje. Je implementováno hlídání validity vstupního formátu dat.
@@ -33,7 +35,7 @@ K samotnému pochopení experimentu doporučuji projít následující ilustrace
     1. **Řetězce jsou shodné** - např. str1="BCDFGHJ", str2="BCDFGHJ"
     2. **Záměna znaku** - např. str1="BCDFGHJ", str2="BCYFGHJ" (_záměna 3. znaku za Y_)
     3. **Změna pořadí** - např. str1="BCDFGHJ", str2="BDCFGHJ" (_prohození znaků na 2. a 3. pozici_)
-2. Následně je spuštěn experiment, kde jsou participantům postupně zobrazovány všechny pokusy a on rozhoduje (pomocí 2 kláves), zda se řetězce shodují. Vše probíhá v těchto fázích.
+2. Následně je spuštěn experiment, kde jsou participantům postupně zobrazovány všechny pokusy a on rozhoduje (pomocí 2 kláves), zda se řetězce shodují. Vše probíhá v těchto krocích.
   1. Čekání na zahájení pokusu stiskem klávesy
     ![Dialog - stav před začátkem pokusu](/docs/img/experiment_run_begin_trial.png)
   2. Zobrazení řetězce k zapamatování po dobu 5s (_výchozí hodnota_)
