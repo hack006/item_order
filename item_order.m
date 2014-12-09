@@ -1,3 +1,10 @@
+%% %%%%%
+% Author: Ondrej Janata <janaton1@fel.cvut.cz>
+%
+% Homepage: https://github.com/hack006/item_order
+% Documentation: https://github.com/hack006/item_order/README.md
+% License: GPLv3 (http://www.gnu.org/licenses/gpl-3.0.txt)
+% %%%%%%
 classdef item_order
     properties
         %% Properties
@@ -30,10 +37,10 @@ classdef item_order
         % reasoning if string is same or different
         delay_time
         
-        %
+        % Percentage of trials where characters are swapped
         character_swap_percentage
         
-        %
+        % Percenatge of trials where character is changed
         character_change_percentage
         
         % Vector of percentage of change changes on string position
@@ -42,6 +49,8 @@ classdef item_order
         % Store current trial type for transmitting type between run and
         % result function
         current_trial_type
+        
+        current_position_change
         
     end
     
@@ -53,7 +62,7 @@ classdef item_order
         function T=item_order()
             T.name = 'Item order - pořadí objektů';
             T.inputs = {'string_to_memorize', 'string_to_match','change_type','change_position'};
-            T.outputs = {};
+            T.outputs = {'type','change_position','answer_key'};
             T.create_date='2014-11-05';
             T.creator='Ondrej Janata <janaton1@fel.cvut.cz>';
             
@@ -73,7 +82,7 @@ classdef item_order
         % @OBLIGATORY
         function T=run(T,varargin)%obligatory
             % %%%%
-            % WORKAROUND - direct passing arguments failed
+            % WORKAROUND - direct passing of arguments failed
             % %%%%
             string_to_memorize = varargin{1,1};
             string_to_match = varargin{1,2};
@@ -83,24 +92,32 @@ classdef item_order
             change_position = tmp{1};
             % store current trial type - used in result function
             T.current_trial_type = change_type;
+            T.current_position_change = change_position;
             
             % %%%%
             % SHOW BEFORE TRIAL EXPERIMENT TEXT
             % %%%%
-            instructions_text_bg = ...
-                uicontrol('style','text','units','normalized','FontSize',16,...
+            instructions_text_bg = uicontrol('units','normalized',...
+                'style','text',...
+                'FontSize',16,...
                 'position',[0.05 0.85 0.9 0.1],'string','');
-            instructions_text = ...
-                uicontrol('style','text','units','normalized','FontSize',16,...
+            instructions_text = uicontrol('units','normalized',...
+                'style','text',...
+                'FontSize',16,...
                 'position',[0.05 0.80 0.9 0.1],'string','Press any key to start next trial.');
-            test_string_bg = ...
-                uicontrol('style','text','units','normalized','FontSize',44,...
+            test_string_bg = uicontrol('units','normalized',...
+                'style','text',...
+                'FontSize',44,...
                 'position',[0.15 0.4 0.7 0.2],'BackgroundColor','black',...
                 'ForegroundColor','white','string','');
-            test_string_label = ...
-                uicontrol('style','text','units','normalized','FontSize',44,...
-                'position',[0.15 0.45 0.7 0.1],'BackgroundColor','black',...
-                'FontName', 'Monospaced', 'ForegroundColor','white','string','-------');
+            test_string_label = uicontrol('units','normalized',...
+                'style','text',...
+                'FontSize',44,...
+                'position',[0.15 0.45 0.7 0.1],...
+                'BackgroundColor','black',...
+                'ForegroundColor','white',...
+                'FontName', 'Monospaced',...
+                'string','-------');
             
             waitforbuttonpress;
             % %%%%
@@ -158,6 +175,7 @@ classdef item_order
             T.Results.correctness(j) = answer %numerical value from 0−1 which describes the quality of the answer
             %in results you can save any further information important to be saved for the task
             T.Results.type(j) = T.current_trial_type
+            T.Results.change_position(j) = T.current_position_change
             T.Results.answer_key(j) = response_key
         end
         
@@ -403,7 +421,13 @@ classdef item_order
                 'CellEditCallback', @T.manualTableChangedValidationCallback);
             
             % Draw control buttons
-            save_btn = uicontrol(manualDialog,'units','normalized','style','pushbutton','string','SAVE', 'FontSize', 8, 'HorizontalAlignment','left','position',[0.8 0.02 0.15 0.05],'callback',@T.manualDataSAVECallback);
+            save_btn = uicontrol(manualDialog,'units','normalized',...
+                'style','pushbutton',...
+                'string','SAVE',...
+                'FontSize', 8,...
+                'HorizontalAlignment',...
+                'left','position',[0.8 0.02 0.15 0.05],...
+                'callback',{@T.manualDataSAVECallback,manualConfigTable});
         
             waitfor(save_btn);
             
@@ -555,13 +579,23 @@ classdef item_order
         %%
         % Manual trial data setup dialog - save button callback
         %
-        % Makes nothing special.
+        % Ensures correct settings of trials
         %
-        % @todo Add validation based on correctness of entered data in the
-        % table
-        %
-        function manualDataSAVECallback(T,hObject,eventData)
-            delete(hObject);
+        function manualDataSAVECallback(T,hObject,eventData,hTable)
+            tableData = get(hTable,'Data');
+            all_data_correct = true;
+            % Check all rows of table if trial is entered correctly
+            for i=1:size(tableData,1)
+                if tableData{i,6} == false
+                    all_data_correct = false;
+                end
+            end;
+            
+            if all_data_correct
+                delete(hObject)
+            else
+                h = warndlg('Not all trials are entered correctly! Please, correct it.');
+            end
         end
         
         %% %%%%%
@@ -582,7 +616,43 @@ classdef item_order
         % @todo implement
         % %%%%%%
         function datTask = Partly_random(T,nmbRep)  
-            % TODO
+            partlyRandomDialog = figure('Name','Warning! Partly random generation not supported, yet.',...
+                'Units','pixels',...
+                'Position',[10 10 320 240],...
+                'MenuBar', 'none',...
+                'Color',[0.98 0.72 0.72]);
+            
+            uicontrol(partlyRandomDialog,'Units','normalized',...
+                'Style','text',...
+                'Position',[0.05 0.5 0.9 0.4],...
+                'BackgroundColor','red',...
+                'String','');
+            uicontrol(partlyRandomDialog,'Units','normalized',...
+                'Style','text',...
+                'Position',[0.1 0.54 0.8 0.34],...
+                'ForegroundColor','white',...
+                'BackgroundColor','red',...
+                'String','Partly manual generator is not currently implemented. Switching to manual one ...',...
+                'FontSize',14);
+            ok = uicontrol(partlyRandomDialog,'Units','normalized',...
+                'Style','pushbutton',...
+                'Position',[0.6 0.1 0.35 0.1],...
+                'String','Ok',...
+                'Callback',@T.partlyRandomOkCallback);
+            
+            waitfor(ok); % wait for accepting dialog
+            
+            delete(partlyRandomDialog);
+            datTask = T.Manually_edit(nmbRep);
+        end
+        
+        %% %%%%%
+        % Callback called before closing partly random dialog
+        %
+        % %%%%%%
+        function partlyRandomOkCallback(T,hObject,event)
+            % do nothing
+            delete(hObject);
         end
         
         %% %%%%%
