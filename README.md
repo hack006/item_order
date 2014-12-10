@@ -4,7 +4,7 @@
 This is implementation of **item order** psychological experiment written for great _open-source_ toolbox PSYCHEEg which is based on _Matlab_.
 
 ### Install
-Install process of the experiment is simple. All you have to do is copy _item_order_ folder to _<PSYCHEEg_ROOT>/Tasks/_ directory.
+Install process of the experiment is simple. All you have to do is copy _item_order_ folder to _{PSYCHEEg_ROOT}/Tasks/_ directory.
 
 ### PSYCHEEg
 Matlab toolbox for psychological experiments supporting EEG measurement. Developed on CTU in Prague. More info: [PSYCHEEg homepage](http://bio.felk.cvut.cz/psychee/)
